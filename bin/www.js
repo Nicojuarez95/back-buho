@@ -1,8 +1,5 @@
-#!/usr/bin/env node
+import 'dotenv/config.js';
 
-/**
- * Module dependencies.
- */
 
 import app from "../app.js"
 import debug from "debug"

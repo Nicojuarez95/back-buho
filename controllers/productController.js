@@ -1,96 +1,112 @@
-import Product from '../models/producto.js';
+import Product from '../models/producto.js'; // Asegúrate que el nombre del archivo del modelo coincida
 
-const productController = {
+/**
+ * Crea un nuevo producto, manejando la subida de una imagen.
+ */
+export const createProduct = async (req, res) => {
+  try {
+    const { name, description, price } = req.body;
 
-  // --- CREAR UN NUEVO PRODUCTO ---
-  createProduct: async (req, res) => {
-    try {
-      const { name, description, price, imageUrl } = req.body;
-      const userId = req.user.id; // Obtenemos el ID del usuario logueado desde el token
-
-      if (!name || !price) {
-        return res.status(400).json({ message: 'El nombre y el precio son obligatorios.' });
-      }
-
-      const newProduct = new Product({
-        name,
-        description,
-        price,
-        imageUrl,
-        userId // Asociamos el producto al usuario
-      });
-
-      await newProduct.save();
-      res.status(201).json({ message: 'Producto creado exitosamente.', product: newProduct });
-
-    } catch (error) {
-      console.error('Error al crear el producto:', error);
-      res.status(500).json({ message: 'Error interno del servidor.' });
+    // Construimos la URL de la imagen si se subió un archivo
+    let imageUrl = null;
+    if (req.file) {
+      // req.file.path es la ruta local (ej: 'uploads/image-163...jpg') que Multer nos da.
+      // La URL completa será accesible desde el frontend.
+      // NOTA: Asegúrate que tu backend esté sirviendo la carpeta 'uploads' estáticamente.
+      const imagePath = req.file.path.replace(/\\/g, "/"); // Normalizamos la ruta para cualquier sistema operativo
+      imageUrl = `${req.protocol}://${req.get('host')}/${imagePath}`;
     }
-  },
 
-  // --- OBTENER TODOS LOS PRODUCTOS DE LA TIENDA LOGUEADA ---
-  getProductsByUser: async (req, res) => {
-    try {
-      const userId = req.user.id;
-      const products = await Product.find({ userId: userId });
-      
-      res.json(products);
+    const newProduct = new Product({
+      name,
+      description,
+      price,
+      imageUrl, // Guardamos la URL completa en la BD
+      userId: req.user.id,
+    });
 
-    } catch (error) {
-      console.error('Error al obtener los productos:', error);
-      res.status(500).json({ message: 'Error interno del servidor.' });
-    }
-  },
-
-  // --- ACTUALIZAR UN PRODUCTO ---
-  updateProduct: async (req, res) => {
-    try {
-      const { id } = req.params; // ID del producto a actualizar
-      const userId = req.user.id;
-      const { name, description, price, imageUrl } = req.body;
-
-      // Buscamos el producto y nos aseguramos de que le pertenezca al usuario logueado
-      const product = await Product.findOne({ _id: id, userId: userId });
-
-      if (!product) {
-        return res.status(404).json({ message: 'Producto no encontrado o no tienes permiso para editarlo.' });
-      }
-
-      // Actualizamos los campos
-      product.name = name || product.name;
-      product.description = description || product.description;
-      product.price = price || product.price;
-      product.imageUrl = imageUrl || product.imageUrl;
-
-      const updatedProduct = await product.save();
-      res.json({ message: 'Producto actualizado exitosamente.', product: updatedProduct });
-
-    } catch (error) {
-      console.error('Error al actualizar el producto:', error);
-      res.status(500).json({ message: 'Error interno del servidor.' });
-    }
-  },
-  
-  // --- ELIMINAR UN PRODUCTO ---
-  deleteProduct: async (req, res) => {
-    try {
-        const { id } = req.params; // ID del producto a eliminar
-        const userId = req.user.id;
-
-        const result = await Product.deleteOne({ _id: id, userId: userId });
-
-        if (result.deletedCount === 0) {
-            return res.status(404).json({ message: 'Producto no encontrado o no tienes permiso para eliminarlo.' });
-        }
-
-        res.json({ message: 'Producto eliminado exitosamente.' });
-
-    } catch (error) {
-        console.error('Error al eliminar el producto:', error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
-    }
+    const savedProduct = await newProduct.save();
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    console.error('Error al crear el producto:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
 
-export default productController;
+/**
+ * Obtiene todos los productos del usuario logueado.
+ */
+export const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ userId: req.user.id });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener los productos.' });
+  }
+};
+
+/**
+ * Obtiene un producto específico por su ID.
+ */
+export const getProductById = async (req, res) => {
+    try {
+        const product = await Product.findOne({ _id: req.params.id, userId: req.user.id });
+        if (!product) {
+            return res.status(404).json({ message: 'Producto no encontrado.' });
+        }
+        res.status(200).json(product);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el producto.' });
+    }
+};
+
+/**
+ * Actualiza un producto existente, manejando una posible nueva imagen.
+ */
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, price } = req.body;
+    
+    const updateData = { name, description, price };
+
+    // Si se sube una nueva imagen, actualizamos la URL
+    if (req.file) {
+      const imagePath = req.file.path.replace(/\\/g, "/");
+      updateData.imageUrl = `${req.protocol}://${req.get('host')}/${imagePath}`;
+      // Aquí podrías añadir lógica para borrar la imagen antigua del servidor si lo deseas
+    }
+
+    const updatedProduct = await Product.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      updateData,
+      { new: true } // Esto hace que devuelva el documento ya actualizado
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: 'Producto no encontrado.' });
+    }
+
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error('Error al actualizar el producto:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
+
+/**
+ * Elimina un producto.
+ */
+export const deleteProduct = async (req, res) => {
+    try {
+        const result = await Product.deleteOne({ _id: req.params.id, userId: req.user.id });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: 'Producto no encontrado.' });
+        }
+        res.status(200).json({ message: 'Producto eliminado exitosamente.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar el producto.' });
+    }
+};
+

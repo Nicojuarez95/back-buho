@@ -1,4 +1,5 @@
 import Client from '../models/Client.js';
+import Purchase from '../models/compra-transaccion.js'; 
 
 const clientController = {
 
@@ -52,18 +53,28 @@ const clientController = {
   // --- OBTENER UN CLIENTE ESPECÍFICO POR SU ID ---
   getClientById: async (req, res) => {
     try {
-        const { id } = req.params;
-        const userId = req.user.id;
+    const { id } = req.params;
 
-        const client = await Client.findOne({ _id: id, userId: userId });
-        if (!client) {
-            return res.status(404).json({ message: 'Cliente no encontrado.' });
-        }
-        res.json(client);
-    } catch (error) {
-        console.error('Error al obtener el cliente:', error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+    // Buscamos al cliente
+    const client = await Client.findOne({ _id: id, userId: req.user.id });
+
+    if (!client) {
+      return res.status(404).json({ message: 'Cliente no encontrado.' });
     }
+
+    // Buscamos todas las compras asociadas a ese cliente
+    const purchases = await Purchase.find({ clientId: id, userId: req.user.id }).sort({ createdAt: -1 });
+
+    // Enviamos un objeto que contiene tanto los datos del cliente como su historial
+    res.status(200).json({
+      client,
+      purchases
+    });
+
+  } catch (error) {
+    console.error('Error al obtener el cliente:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
   },
 
   // --- ACTUALIZAR UN CLIENTE ---

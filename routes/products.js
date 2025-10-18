@@ -1,23 +1,23 @@
 import express from 'express';
-import productController from '../controllers/productController.js';
+import {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+} from '../controllers/productController.js';
 import authenticateToken from '../middlewares/authenticate.js';
+import uploadMiddleware from '../middlewares/upload.js';
 
 const router = express.Router();
 
-// --- RUTAS PROTEGIDAS ---
-// Todas las rutas definidas aquí requerirán un token válido.
-router.use(authenticateToken);
+router.get('/', authenticateToken, getAllProducts);
+router.get('/:id', authenticateToken, getProductById);
 
-// POST /api/products -> Crear un nuevo producto
-router.post('/', productController.createProduct);
+// Usamos el middleware de subida en las rutas de creación y actualización
+router.post('/', authenticateToken, uploadMiddleware, createProduct);
+router.put('/:id', authenticateToken, uploadMiddleware, updateProduct);
 
-// GET /api/products -> Obtener todos los productos de la tienda logueada
-router.get('/', productController.getProductsByUser);
-
-// PUT /api/products/:id -> Actualizar un producto específico
-router.put('/:id', productController.updateProduct);
-
-// DELETE /api/products/:id -> Eliminar un producto específico
-router.delete('/:id', productController.deleteProduct);
+router.delete('/:id', authenticateToken, deleteProduct);
 
 export default router;
