@@ -27,8 +27,11 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  // El rol podría servir a futuro si quieres tener "empleados" dentro de una tienda.
-  // Por ahora, lo mantenemos simple.
+  phoneNumber: {
+    type: String,
+    required: false, // Lo hacemos opcional por ahora
+    trim: true
+  },
   rol: { 
     type: String, 
     default: 'Empleado' 
