@@ -3,7 +3,7 @@ import 'dotenv/config.js';
 
 import app from "../app.js"
 import debug from "debug"
-const logger = debug("back-app-cashback:server")
+const logger = debug("back-buho-app:server")
 import http from 'http'
 
 
