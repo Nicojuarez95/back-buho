@@ -19,7 +19,6 @@ app.use(express.urlencoded({ extended: false })); // Permite al servidor entende
 // Esta línea hace que la carpeta 'public' sea accesible.
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ESTA ES LA LÍNEA MÁS IMPORTANTE PARA LAS IMÁGENES:
 // Hace que la carpeta 'uploads' sea accesible desde el navegador.
 // Así, una imagen guardada en 'uploads/imagen1.jpg' se podrá ver en 'http://localhost:8000/uploads/imagen1.jpg'.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
