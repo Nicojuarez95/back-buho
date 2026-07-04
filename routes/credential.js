@@ -5,10 +5,11 @@ import {
     getCredentials
 } from "../controllers/credential.controller.js";
 
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+
 const router = express.Router();
 
-router.post("/",createCredential);
-
-router.get("/",getCredentials);
+router.post("/", authMiddleware, createCredential);
+router.get("/", authMiddleware, getCredentials);
 
 export default router;

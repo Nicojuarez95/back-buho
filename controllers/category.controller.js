@@ -4,7 +4,10 @@ export const createCategory = async (req, res) => {
 
     try {
 
-        const category = new Category(req.body);
+        const category = new Category({
+            ...req.body,
+            user: req.user._id
+        });
 
         await category.save();
 
@@ -28,7 +31,9 @@ export const getCategories = async (req, res) => {
 
     try {
 
-        const categories = await Category.find().sort({
+        const categories = await Category.find({
+            user: req.user._id
+        }).sort({
             minAmount: 1
         });
 
