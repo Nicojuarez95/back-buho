@@ -1,42 +1,44 @@
 import mongoose from "mongoose";
 
 const invoiceSchema = new mongoose.Schema({
+
     user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
-    },
-    
-    amount:{
-        type:Number,
-        required:true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
 
-    category:{
-        type:String,
-        required:true
+    amount: {
+        type: Number,
+        required: true
     },
 
-    status:{
-        type:String,
-        enum:["PENDING","SUCCESS","ERROR"],
-        default:"PENDING"
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+        required: true
     },
 
-    invoiceNumber:{
-        type:Number
+    status: {
+        type: String,
+        enum: ["PENDING", "SUCCESS", "ERROR"],
+        default: "PENDING"
     },
 
-    cae:{
-        type:String
+    invoiceNumber: {
+        type: Number
     },
 
-    error:{
-        type:String
+    cae: {
+        type: String
+    },
+
+    error: {
+        type: String
     }
 
-},{
-    timestamps:true
-})
+}, {
+    timestamps: true
+});
 
-export default mongoose.model("Invoice",invoiceSchema);
+export default mongoose.model("Invoice", invoiceSchema);

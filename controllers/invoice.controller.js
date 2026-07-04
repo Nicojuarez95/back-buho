@@ -86,4 +86,27 @@ export const simulateInvoices = async (req, res) => {
 
     }
 
+}; 
+export const getInvoices = async (req, res) => {
+
+    try {
+
+        const invoices = await invoiceService.getInvoices(
+            req.user._id
+        );
+
+        res.json({
+            ok: true,
+            invoices
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            ok: false,
+            message: error.message
+        });
+
+    }
+
 }
