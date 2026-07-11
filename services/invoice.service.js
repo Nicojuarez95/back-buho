@@ -39,6 +39,36 @@ class InvoiceService {
 
     }
 
+    async processPendingInvoices(userId) {
+
+    const invoices = await Invoice.find({
+        user: userId,
+        status: "PENDING"
+    });
+
+    const processed = [];
+
+    for (const invoice of invoices) {
+
+        invoice.status = "PROCESSING";
+
+        await invoice.save();
+
+        // Más adelante acá vamos a llamar a ARCA
+
+        await afipInvoiceService.sendInvoice(invoice);
+
+        invoice.sentAt = new Date();
+
+        await invoice.save();
+
+        processed.push(invoice);
+
+    }
+
+    return processed;
+
+}
 }
 
 export default new InvoiceService();

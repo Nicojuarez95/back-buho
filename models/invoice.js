@@ -21,7 +21,12 @@ const invoiceSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ["PENDING", "SUCCESS", "ERROR"],
+        enum: [
+            "PENDING",
+            "PROCESSING",
+            "SUCCESS",
+            "ERROR"
+        ],
         default: "PENDING"
     },
 
@@ -29,8 +34,29 @@ const invoiceSchema = new mongoose.Schema({
         type: Number
     },
 
+    pointOfSale: {
+        type: Number
+    },
+
+    voucherType: {
+        type: Number,
+        default: 11 // Factura C
+    },
+
     cae: {
         type: String
+    },
+
+    caeExpiration: {
+        type: String
+    },
+
+    sentAt: {
+        type: Date
+    },
+
+    afipResponse: {
+        type: mongoose.Schema.Types.Mixed
     },
 
     error: {

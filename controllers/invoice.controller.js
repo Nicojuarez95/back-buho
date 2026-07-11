@@ -107,6 +107,32 @@ export const getInvoices = async (req, res) => {
             message: error.message
         });
 
+    };
+
+    
+
+};
+export const processInvoices = async (req, res) => {
+
+    try {
+
+        const invoices = await invoiceService.processPendingInvoices(
+            req.user._id
+        );
+
+        res.json({
+            ok: true,
+            processed: invoices.length,
+            invoices
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            ok: false,
+            message: error.message
+        });
+
     }
 
-}
+};

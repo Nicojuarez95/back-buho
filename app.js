@@ -14,9 +14,6 @@ app.use(cors()); // Habilita CORS para permitir peticiones desde tu frontend
 app.use(express.json()); // Permite al servidor entender JSON
 app.use(express.urlencoded({ extended: false })); // Permite al servidor entender datos de formularios
 
-// --- Servir Carpetas Estáticas (Archivos Públicos) ---
-
-// Esta línea hace que la carpeta 'public' sea accesible.
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Hace que la carpeta 'uploads' sea accesible desde el navegador.
